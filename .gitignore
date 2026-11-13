@@ -1,0 +1,36 @@
+# ===== 构建产物：可完整重建，不进仓库 =====
+build/
+app/build/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# ===== Gradle =====
+.gradle/
+gradle-app.setting
+.gradletasknamecache
+
+# ===== 本机配置与签名：含绝对路径或私钥，绝不能提交 =====
+local.properties
+key.properties
+*.jks
+*.keystore
+
+# ===== Android Studio / IDEA =====
+.idea/
+*.iml
+*.iws
+*.ipr
+captures/
+.externalNativeBuild/
+.cxx/
+
+# ===== 系统文件 =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== 日志 =====
+*.log

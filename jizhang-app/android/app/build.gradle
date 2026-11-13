@@ -1,0 +1,43 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.example.jizhang'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.example.jizhang'
+        minSdk 23
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+        debug {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    // 仅用于把 assets 映射成本机 https 虚拟域，让 localStorage 有稳定 origin。
+    // 这个库不发起任何网络请求。
+    implementation 'androidx.webkit:webkit:1.8.0'
+
+    // 端侧中文文字识别（bundled 版）：
+    // 模型静态打进 APK，识别全程在设备本地完成，不依赖 Google Play 服务，
+    // 不需要 INTERNET 权限，也不会把截图传出去。代价是 APK 约增大 4 MB。
+    // 注意：不要用 com.google.android.gms:play-services-mlkit-text-recognition-chinese，
+    // 那个版本要联网从 Play 服务下载模型，在国内设备上基本用不了。
+    implementation 'com.google.mlkit:text-recognition-chinese:16.0.1'
+}

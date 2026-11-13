@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, viewport-fit=cover">
+<meta name="theme-color" content="#185FA5">
+<title>安心记账</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--blue:#185FA5;--blue-l:#E6F1FB;--red:#C2451F;--red-l:#FCEEE9;--green:#0F6E56;--green-l:#E1F5EE;--ink:#1F2329;--gray:#6B7280;--line:#E3E7EC;--bg:#F4F6F8;--fz:17px}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;font-size:16px;line-height:1.6}
+body.fs-big{--fz:19px}body.fs-xbig{--fz:22px}
+.app{max-width:480px;margin:0 auto;background:#fff;min-height:100vh;padding-bottom:78px;position:relative}
+header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:8px}
+header .logo{font-size:19px;font-weight:700;color:var(--blue);flex:1}
+.hbtn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 10px;font-size:14px;color:var(--ink);cursor:pointer;line-height:1.3}
+.hbtn.on{background:var(--blue-l);border-color:#B5D4F4;color:var(--blue)}
+.page{display:none;padding:14px 14px 24px}
+.page.active{display:block}
+.tabbar{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;border-top:1px solid var(--line);display:flex;z-index:30;padding-bottom:env(safe-area-inset-bottom)}
+.tabbar button{flex:1;border:0;background:none;padding:8px 2px 9px;font-size:13px;color:var(--gray);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.tabbar button.on{color:var(--blue);font-weight:700}
+.tabbar .ico{width:22px;height:22px;display:block}
+.btn{display:block;width:100%;border:0;border-radius:12px;padding:14px;font-size:17px;font-weight:700;cursor:pointer;text-align:center;line-height:1.4}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-sm{width:auto;padding:8px 14px;font-size:14px;border-radius:9px;display:inline-block}
+.seg{display:flex;background:var(--bg);border-radius:11px;padding:3px;gap:2px}
+.seg button{flex:1;border:0;background:none;padding:9px 4px;border-radius:8px;font-size:15px;color:var(--gray);cursor:pointer}
+.seg button.on{background:#fff;color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.seg button.on.exp{color:var(--red)}.seg button.on.inc{color:var(--green)}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.muted{color:var(--gray);font-size:13px}
+.big-label{font-size:15px;color:var(--gray);margin-bottom:4px}
+.navrow{display:flex;align-items:center;justify-content:space-between;padding:10px 0 12px}
+.navrow .arrow{width:46px;height:42px;font-size:22px;border:1px solid var(--line);background:#fff;border-radius:10px;color:var(--ink);cursor:pointer}
+.navrow .plabel{font-size:17px;font-weight:700}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.metric{background:var(--bg);border-radius:11px;padding:10px 8px;text-align:left}
+.metric .lb{font-size:12px;color:var(--gray)}
+.metric .nm{font-size:19px;font-weight:700;margin-top:3px;white-space:nowrap}
+.filterbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+select,input[type=text],input[type=number],input[type=search]{border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-size:15px;color:var(--ink);background:#fff;font-family:inherit;min-height:42px}
+.filterbar select{flex:1;min-width:100px}
+.filterbar input{flex:1;min-width:110px}
+.dayhead{display:flex;justify-content:space-between;font-size:13px;color:var(--gray);padding:12px 2px 5px;border-bottom:1px solid var(--line)}
+.txrow{display:flex;align-items:center;gap:10px;padding:12px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.txrow .dot{width:40px;height:40px;border-radius:50%;flex:0 0 40px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;background:var(--blue-l);color:var(--blue)}
+.txrow .mid{flex:1;min-width:0}
+.txrow .t1{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txrow .t2{font-size:12px;color:var(--gray)}
+.txrow .amt{font-size:17px;font-weight:700;white-space:nowrap}
+.amt.exp{color:var(--red)}.amt.inc{color:var(--green)}
+.empty{text-align:center;padding:34px 12px;color:var(--gray);font-size:15px}
+.chartbox{background:var(--bg);border-radius:12px;padding:10px 6px 4px;margin-bottom:12px}
+.chartbox svg{display:block;width:100%;height:auto}
+.form-lb{font-size:15px;color:var(--gray);margin:14px 0 6px}
+.money-input{width:100%;border:0;border-bottom:2px solid var(--line);font-size:34px;font-weight:700;padding:8px 2px;color:var(--ink);background:none;font-family:inherit;outline:none}
+.money-input:focus{border-color:var(--blue)}
+.fieldrow{display:flex;justify-content:space-between;align-items:center;padding:14px 2px;border-bottom:1px solid var(--line);cursor:pointer;font-size:16px}
+.fieldrow .v{color:var(--blue);font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:8px 14px;font-size:15px;cursor:pointer;color:var(--ink)}
+.chip.on{background:var(--blue-l);border-color:#B5D4F4;color:var(--blue);font-weight:700}
+.tip{background:#FFF8E8;border:1px solid #F2DEB0;color:#7A5A12;border-radius:11px;padding:11px 13px;font-size:14px;line-height:1.7;margin:12px 0}
+.privacy{background:var(--green-l);color:#085041;border-radius:11px;padding:12px 14px;font-size:14px;line-height:1.7;margin:12px 0}
+.shot{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
+.shot .top{display:flex;gap:10px;align-items:flex-start}
+.shot img{width:72px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:var(--bg);flex:0 0 72px}
+.shot .info{flex:1;min-width:0}
+.shot .fname{font-size:13px;color:var(--gray);word-break:break-all}
+.shot .items{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+.pitem{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:6px 0;border-bottom:1px solid var(--line)}
+.pitem .del{color:var(--red);border:0;background:none;font-size:14px;cursor:pointer}
+.addrow{display:flex;gap:6px;margin-top:10px;align-items:center;flex-wrap:wrap}
+.addrow input[type=number]{width:98px}
+.addrow input[type=text]{flex:1;min-width:90px}
+.miniseg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.miniseg button{border:0;background:#fff;padding:9px 10px;font-size:14px;cursor:pointer;color:var(--gray)}
+.miniseg button.on{background:var(--red-l);color:var(--red);font-weight:700}
+.miniseg button.on.i{background:var(--green-l);color:var(--green);font-weight:700}
+.guide .lead{font-size:var(--fz);line-height:1.9;background:var(--blue-l);border-radius:12px;padding:14px;margin-bottom:18px}
+.guide h2{font-size:22px;margin:26px 0 12px;padding-bottom:8px;border-bottom:3px solid var(--blue);line-height:1.5}
+.guide h3{font-size:19px;margin:18px 0 8px}
+.guide p,.guide li{font-size:var(--fz);line-height:1.9;margin:8px 0}
+.guide ul{padding-left:22px;margin:8px 0}
+.step{display:flex;gap:12px;align-items:flex-start;margin:14px 0;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.step .no{width:38px;height:38px;flex:0 0 38px;border-radius:50%;background:var(--blue);color:#fff;font-size:19px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.step .txt{flex:1;font-size:var(--fz);line-height:1.8;padding-top:4px}
+.step .txt b{color:var(--red)}
+.demo-phone{width:190px;max-width:100%;border:3px solid #33404E;border-radius:16px;background:#fff;margin:10px 0 4px 4px;padding:7px;box-shadow:0 1px 0 #ccc}
+.demo-bar{background:#EDF1F5;border-radius:6px;text-align:center;font-size:12px;padding:4px 0;color:#33404E;margin-bottom:6px}
+.demo-row{background:#F5F7F9;border-radius:6px;margin:5px 0;padding:8px 8px;font-size:13px;color:#33404E;position:relative;line-height:1.4}
+.demo-row.hl{border:2px solid #D8452A;background:#FFF3EF;color:#A33218;font-weight:700}
+.demo-tap{display:inline-block;background:#D8452A;color:#fff;font-size:11px;border-radius:10px;padding:1px 7px;margin-left:4px;white-space:nowrap}
+.demo-foot{font-size:11px;color:var(--gray);text-align:center;padding-top:4px}
+.qa{border-left:4px solid var(--blue);background:var(--bg);padding:10px 12px;margin:10px 0;border-radius:0 10px 10px 0}
+.qa .q{font-size:var(--fz);font-weight:700}
+.qa .a{font-size:var(--fz);line-height:1.8}
+.wheel-mask{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;align-items:flex-end;justify-content:center}
+.wheel-mask.show{display:flex}
+.wheel-panel{background:#fff;width:100%;max-width:480px;border-radius:18px 18px 0 0;padding:16px 14px calc(18px + env(safe-area-inset-bottom))}
+.wheel-title{font-size:18px;font-weight:700;text-align:center;margin-bottom:6px}
+.wheel-hint{text-align:center;color:var(--gray);font-size:13px;margin-bottom:12px}
+.wheel-wrap{position:relative;height:150px;display:flex;border-radius:12px;overflow:hidden;background:#FAFBFC}
+.wheel-col{flex:1;height:150px;overflow-y:auto;scroll-snap-type:y mandatory;text-align:center;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.wheel-col::-webkit-scrollbar{display:none}
+.wheel-pad{height:50px}
+.wheel-item{height:50px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:17px;color:#9AA2AC;cursor:pointer}
+.wheel-item.sel{color:var(--blue);font-weight:700;font-size:20px}
+.wheel-center{position:absolute;left:0;right:0;top:50px;height:50px;border-top:1px solid #B5D4F4;border-bottom:1px solid #B5D4F4;background:rgba(24,95,165,.05);pointer-events:none}
+.wheel-actions{display:flex;gap:10px;margin-top:14px}
+.mask{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:55;align-items:flex-end;justify-content:center}
+.mask.show{display:flex}
+.sheet{background:#fff;width:100%;max-width:480px;border-radius:18px 18px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom))}
+.sheet h3{margin:0 0 12px;font-size:19px}
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#26313D;color:#fff;padding:11px 18px;border-radius:22px;font-size:15px;z-index:90;opacity:0;pointer-events:none;transition:opacity .25s;max-width:88%;text-align:center}
+.toast.show{opacity:1}
+.footnote{text-align:center;color:var(--gray);font-size:12px;padding:16px 4px 4px;line-height:1.7}
+</style>
+</head>
+<body class="fs-big">
+<div class="app">
+<header>
+  <div class="logo">安心记账</div>
+  <button class="hbtn" id="fontBtn" onclick="cycleFont()">字 A+</button>
+  <button class="hbtn" onclick="switchTab('guide')">使用说明</button>
+</header>
+
+<div class="page active" id="page-home">
+  <div class="seg" id="periodSeg">
+    <button data-p="day" onclick="setPeriod('day')">日</button>
+    <button data-p="week" onclick="setPeriod('week')">周</button>
+    <button data-p="month" onclick="setPeriod('month')" class="on">月</button>
+    <button data-p="year" onclick="setPeriod('year')">年</button>
+  </div>
+  <div class="navrow">
+    <button class="arrow" onclick="shiftPeriod(-1)">‹</button>
+    <div class="plabel" id="periodLabel"></div>
+    <button class="arrow" onclick="shiftPeriod(1)">›</button>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="lb">总收入</div><div class="nm" style="color:var(--green)" id="mIncome">¥0.00</div></div>
+    <div class="metric"><div class="lb">总支出</div><div class="nm" style="color:var(--red)" id="mExpense">¥0.00</div></div>
+    <div class="metric"><div class="lb">结余</div><div class="nm" id="mBalance">¥0.00</div></div>
+  </div>
+  <div class="chartbox" id="chartBox"></div>
+  <div class="filterbar">
+    <div class="seg" style="flex:1;min-width:180px">
+      <button id="fAll" class="on" onclick="setType('all')">全部</button>
+      <button id="fExp" onclick="setType('expense')">支出</button>
+      <button id="fInc" onclick="setType('income')">收入</button>
+    </div>
+    <select id="fSource" onchange="renderHome()"><option value="all">全部来源</option><option value="manual">手动记的</option><option value="screenshot">截图传的</option></select>
+    <input type="search" id="fKeyword" placeholder="搜店名 / 备注" oninput="renderHome()">
+  </div>
+  <div id="txList"></div>
+  <button class="btn btn-ghost" id="backupBtn" style="font-size:16px;margin-top:16px" onclick="openBackup()">备份与恢复（换手机用）</button>
+  <button class="btn btn-ghost" id="clearBtn" style="font-size:14px;color:var(--gray);margin-top:10px" onclick="askClear()">清空全部账本</button>
+  <div class="footnote">所有数据只保存在这台手机里 · 本应用不联网<br>换手机前请先点上面「备份与恢复」导出备份</div>
+</div>
+
+<div class="page" id="page-upload">
+  <div class="tip" style="font-size:16px"><b>第 1 步</b>：先在微信、支付宝或手机银行里，把账单页面一屏一屏截好图。<br>不会截？点右上角「使用说明」，里面有一步一步的图。</div>
+  <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">＋ 选择截图（可一次选多张）</button>
+  <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="onFilesPicked(event)">
+  <div class="muted" style="margin:10px 2px 4px">选完还可以再点上面的按钮，继续加图片。</div>
+  <div id="shotList"></div>
+  <div class="privacy"><b>请放心：</b>照片只在您这台手机上显示一下，不会上传到任何地方。点「全部计入总账」之后，照片会立刻从 App 里丢掉，只留下您确认过的金额和日期。</div>
+  <button class="btn btn-primary" id="confirmAllBtn" onclick="confirmAll()" disabled>全部计入总账</button>
+</div>
+
+<div class="page" id="page-manual">
+  <div class="form-lb">第 1 步：这笔钱是花出去的，还是收进来的？</div>
+  <div class="seg">
+    <button id="dExp" class="on exp" onclick="setDraftType('expense')">支出（花出去）</button>
+    <button id="dInc" onclick="setDraftType('income')">收入（收进来）</button>
+  </div>
+  <div class="form-lb">第 2 步：多少钱？</div>
+  <div style="display:flex;align-items:baseline;gap:6px"><span style="font-size:26px;color:var(--gray)">¥</span><input class="money-input" id="dAmount" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00"></div>
+  <div class="form-lb">第 3 步：哪一天？（已经帮您填好今天，不用改就跳过）</div>
+  <div class="fieldrow" onclick="openWheel()"><span>日期</span><span class="v" id="dDate"></span></div>
+  <div class="muted" style="margin-top:8px">想改日子：点上面这一行，用手指<b>上下滚动</b>年、月、日，把想要的数字滚到中间蓝框里，再点「确定」。</div>
+  <div class="form-lb">第 4 步：算哪一类？（可不选）</div>
+  <div class="chips" id="catChips"></div>
+  <div class="form-lb">备注（可不填，比如「买菜」）</div>
+  <input type="text" id="dNote" placeholder="写不写都行" style="width:100%">
+  <div style="height:18px"></div>
+  <button class="btn btn-primary" onclick="saveDraft()">保存并计入总账</button>
+  <div class="privacy" style="margin-top:16px">存好后，这笔钱会马上算进「日 / 周 / 月 / 年」的总收入、总支出里。</div>
+</div>
+
+<div class="page guide" id="page-guide"></div>
+
+<div class="tabbar">
+  <button id="tab-home" class="on" onclick="switchTab('home')"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>明细</button>
+  <button id="tab-upload" onclick="switchTab('upload')"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="9" cy="9" r="1.5"/></svg>上传截图</button>
+  <button id="tab-manual" onclick="switchTab('manual')"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/></svg>记一笔</button>
+  <button id="tab-guide" onclick="switchTab('guide')"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5a2 2 0 012-2h13v18H6a2 2 0 01-2-2z"/><path d="M8 8h7M8 12h7M8 16h4"/></svg>使用说明</button>
+</div>
+</div>
+
+<div class="wheel-mask" id="wheelMask" onclick="if(event.target===this)closeWheel()">
+  <div class="wheel-panel">
+    <div class="wheel-title">滚动选择日期</div>
+    <div class="wheel-hint">用手指上下滚动，把想要的数字停在中间蓝框里</div>
+    <div class="wheel-wrap">
+      <div class="wheel-col" id="wYear"></div>
+      <div class="wheel-col" id="wMonth"></div>
+      <div class="wheel-col" id="wDay"></div>
+      <div class="wheel-center"></div>
+    </div>
+    <div class="wheel-actions">
+      <button class="btn btn-ghost" onclick="wheelToday()">回到今天</button>
+      <button class="btn btn-ghost" onclick="closeWheel()">取消</button>
+      <button class="btn btn-primary" onclick="confirmWheel()">确定</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="editMask" onclick="if(event.target===this)closeEdit()">
+  <div class="sheet">
+    <h3>这一笔要怎么改？</h3>
+    <div id="editInfo" class="muted" style="margin-bottom:14px"></div>
+    <button class="btn btn-ghost" style="margin-bottom:10px" onclick="editAsNew()">改金额 / 改日期 / 改备注</button>
+    <button class="btn btn-ghost" style="color:var(--red)" onclick="deleteTx()">删除这一笔</button>
+    <div style="height:10px"></div>
+    <button class="btn btn-primary" onclick="closeEdit()">先不改，返回</button>
+  </div>
+</div>
+
+<div class="mask" id="backupMask" onclick="if(event.target===this)closeBackup()">
+  <div class="sheet">
+    <h3>备份与恢复</h3>
+    <div id="backupInfo" class="muted" style="margin-bottom:12px"></div>
+    <div class="tip">换手机之前，先在旧手机点「导出备份」把账本存成一个文件；到新手机装好 App，再点「从备份文件恢复」把账目找回来。这个文件由您自己保管，App 不会上传它。</div>
+    <button class="btn btn-primary" onclick="exportBackup()">① 导出备份文件</button>
+    <div style="height:10px"></div>
+    <button class="btn btn-ghost" onclick="pickBackup()">② 从备份文件恢复</button>
+    <input type="file" id="backupFile" accept="*/*" style="display:none" onchange="onBackupPicked(event)">
+    <div id="restoreArea"></div>
+    <div style="height:10px"></div>
+    <button class="btn btn-ghost" onclick="closeBackup()">返回</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var KEY='anjixin_tx_v1', SKEY='anjixin_settings_v1';
+var CATS=['餐饮','买菜','购物','交通','水电','看病','娱乐','工资','红包','其他'];
+var CATCOLOR={'餐饮':'#FAEEDA','买菜':'#EAF3DE','购物':'#EEEDFE','交通':'#E6F1FB','水电':'#E1F5EE','看病':'#FCEBEB','娱乐':'#FBEAF0','工资':'#E1F5EE','红包':'#FCEBEB','其他':'#F1EFE8'};
+var MEM={tx:[],ok:true};
+var state={tab:'home',period:'month',cursor:new Date(),type:'all',pending:[],draft:{type:'expense',date:'',category:'其他',note:''},editId:null,editTarget:null,backupData:null,wheel:{y:2026,m:11,d:13}};
+
+function pad(n){return String(n).padStart(2,'0')}
+function dstr(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function todayStr(){return dstr(new Date())}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function fmt(c){var neg=c<0;return (neg?'-':'')+'¥'+(Math.abs(c)/100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',')}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function load(){
+  try{var r=localStorage.getItem(KEY);MEM.tx=r?JSON.parse(r):[];if(!Array.isArray(MEM.tx))MEM.tx=[]}catch(e){MEM.ok=false;MEM.tx=[]}
+  try{var s=localStorage.getItem(SKEY);if(s){var o=JSON.parse(s);if(o&&o.period)state.period=o.period;if(o&&o.fs)document.body.className=o.fs}}catch(e){}
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(MEM.tx));localStorage.setItem(SKEY,JSON.stringify({period:state.period,fs:document.body.className}))}catch(e){MEM.ok=false}}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show')},2200)}
+function cycleFont(){var a=['','fs-big','fs-xbig'],i=a.indexOf(document.body.className);document.body.className=a[(i+1)%a.length];document.getElementById('fontBtn').textContent='字 A+ '+(document.body.className==='fs-xbig'?'最大':document.body.className==='fs-big'?'大':'标准');save();toast('字号已调整')}
+
+function startOfWeek(d){var x=new Date(d),w=(x.getDay()+6)%7;x.setDate(x.getDate()-w);x.setHours(0,0,0,0);return x}
+function rangeFor(p,c){var d=new Date(c);d.setHours(0,0,0,0);var s,e,l;
+ if(p==='day'){s=new Date(d);e=new Date(d);l=(d.getMonth()+1)+'月'+d.getDate()+'日'}
+ else if(p==='week'){s=startOfWeek(d);e=new Date(s);e.setDate(e.getDate()+6);l=(s.getMonth()+1)+'月'+s.getDate()+'日 - '+(e.getMonth()+1)+'月'+e.getDate()+'日'}
+ else if(p==='month'){s=new Date(d.getFullYear(),d.getMonth(),1);e=new Date(d.getFullYear(),d.getMonth()+1,0);l=d.getFullYear()+'年'+(d.getMonth()+1)+'月'}
+ else{s=new Date(d.getFullYear(),0,1);e=new Date(d.getFullYear(),11,31);l=d.getFullYear()+'年'}
+ return {s:s,e:e,label:l,ss:dstr(s),ee:dstr(e)}}
+function shiftPeriod(n){var d=new Date(state.cursor);if(state.period==='day')d.setDate(d.getDate()+n);else if(state.period==='week')d.setDate(d.getDate()+7*n);else if(state.period==='month')d.setMonth(d.getMonth()+n);else d.setFullYear(d.getFullYear()+n);state.cursor=d;renderHome()}
+function setPeriod(p){state.period=p;var b=document.querySelectorAll('#periodSeg button');for(var i=0;i<b.length;i++)b[i].classList.toggle('on',b[i].getAttribute('data-p')===p);save();renderHome()}
+function setType(t){state.type=t;['fAll','fExp','fInc'].forEach(function(id){document.getElementById(id).classList.remove('on')});document.getElementById(t==='expense'?'fExp':t==='income'?'fInc':'fAll').classList.add('on');renderHome()}
+function currentList(){var r=rangeFor(state.period,state.cursor),src=document.getElementById('fSource').value,kw=(document.getElementById('fKeyword').value||'').trim().toLowerCase();
+ return MEM.tx.filter(function(x){if(x.date<r.ss||x.date>r.ee)return false;if(state.type!=='all'&&x.type!==state.type)return false;if(src!=='all'&&x.source!==src)return false;if(kw&&((x.note||'')+' '+(x.category||'')+' '+(x.channel||'')).toLowerCase().indexOf(kw)<0)return false;return true})}
+function renderHome(){var r=rangeFor(state.period,state.cursor);document.getElementById('periodLabel').textContent=r.label;
+ var list=currentList(),inc=0,exp=0;list.forEach(function(x){if(x.type==='income')inc+=x.amount;else exp+=x.amount});
+ document.getElementById('mIncome').textContent=fmt(inc);document.getElementById('mExpense').textContent=fmt(exp);document.getElementById('mBalance').textContent=fmt(inc-exp);
+ renderChart(r,list);renderList(list)}
+function bucketIndex(x,r,p){if(p==='day'){var h=parseInt((x.time||'12:00').split(':')[0],10)||12;return h<6?0:h<12?1:h<18?2:3}
+ if(p==='week'){var d=new Date(x.date+'T12:00:00');return (d.getDay()+6)%7}
+ if(p==='month'){return parseInt(x.date.slice(8,10),10)-1}
+ return parseInt(x.date.slice(5,7),10)-1}
+function bucketCount(r,p){if(p==='day')return 4;if(p==='week')return 7;if(p==='month')return r.e.getDate();return 12}
+function renderChart(r,list){var n=bucketCount(r,state.period),ai=new Array(n).fill(0),ae=new Array(n).fill(0),labels=[];
+ list.forEach(function(x){var i=Math.max(0,Math.min(n-1,bucketIndex(x,r,state.period)));if(x.type==='income')ai[i]+=x.amount;else ae[i]+=x.amount});
+ if(state.period==='day')labels=['半夜','上午','下午','晚上'];else if(state.period==='week')labels=['一','二','三','四','五','六','日'];else if(state.period==='year')labels=['1','2','3','4','5','6','7','8','9','10','11','12'];else labels=[];
+ var W=320,H=118,L=8,R=8,T=12,B=24,max=Math.max(1,Math.max.apply(null,ai.concat(ae))),pw=W-L-R,ph=H-T-B;
+ function line(a){return a.map(function(v,i){var x=L+(n===1?pw/2:i*pw/(n-1)),y=T+ph-(v/max)*ph;return x.toFixed(1)+','+y.toFixed(1)}).join(' ')}
+ var grid='<path d="M'+L+' '+(T+ph/2)+' H'+(W-R)+' M'+L+' '+(T+ph)+' H'+(W-R)+'" stroke="#DDE3EA" stroke-width="1" fill="none"/>';
+ var labs='';if(labels.length){var step=Math.ceil(n/7);for(var i=0;i<n;i+=step){var x=L+(n===1?pw/2:i*pw/(n-1));labs+='<text x="'+x.toFixed(1)+'" y="'+(H-6)+'" font-size="11" fill="#8A929C" text-anchor="middle">'+labels[i]+'</text>'}}
+ document.getElementById('chartBox').innerHTML='<svg viewBox="0 0 320 118" role="img" aria-label="收入与支出走势">'+grid+'<polyline points="'+line(ai)+'" fill="none" stroke="#0F6E56" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><polyline points="'+line(ae)+'" fill="none" stroke="#D85A30" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'+labs+'</svg><div style="display:flex;gap:16px;justify-content:center;font-size:12px;color:#6B7280;padding-bottom:6px"><span><span style="display:inline-block;width:14px;height:3px;background:#0F6E56;vertical-align:middle"></span> 收入</span><span><span style="display:inline-block;width:14px;height:3px;background:#D85A30;vertical-align:middle"></span> 支出</span></div>'}
+function renderList(list){var el=document.getElementById('txList');if(!list.length){el.innerHTML='<div class="empty">这段时间还没有记账。<br>点下面的「记一笔」或「上传截图」就能开始。</div>';return}
+ var g={};list.forEach(function(x){(g[x.date]=g[x.date]||[]).push(x)});var days=Object.keys(g).sort().reverse(),h='';
+ days.forEach(function(d){var arr=g[d],di=0,de=0;arr.forEach(function(x){if(x.type==='income')di+=x.amount;else de+=x.amount});
+  var dt=new Date(d+'T12:00:00'),wk=['周日','周一','周二','周三','周四','周五','周六'][dt.getDay()];
+  h+='<div class="dayhead"><span>'+d.slice(5,7)+'月'+d.slice(8,10)+'日 · '+wk+(d===todayStr()?' · 今天':'')+'</span><span>收 '+fmt(di)+' / 支 '+fmt(de)+'</span></div>';
+  arr.sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0)}).forEach(function(x){var c=x.category||'其他',col=CATCOLOR[c]||'#F1EFE8';
+   h+='<div class="txrow" onclick="openEdit(\''+x.id+'\')"><div class="dot" style="background:'+col+'">'+esc(c.slice(0,1))+'</div><div class="mid"><div class="t1">'+esc(x.note||c)+'</div><div class="t2">'+esc((x.time||'')+' · '+c+' · '+(x.source==='manual'?'手动':(x.channel||'截图')))+'</div></div><div class="amt '+(x.type==='income'?'inc':'exp')+'">'+(x.type==='income'?'+':'-')+fmt(x.amount)+'</div></div>'});});
+ el.innerHTML=h}
+
+function setDraftType(t){state.draft.type=t;document.getElementById('dExp').className=t==='expense'?'on exp':'';document.getElementById('dInc').className=t==='income'?'on inc':''}
+function renderDraftDate(){var d=state.draft.date;document.getElementById('dDate').textContent=d.slice(0,4)+'年'+parseInt(d.slice(5,7),10)+'月'+parseInt(d.slice(8,10),10)+'日'+(d===todayStr()?'（今天）':'')+' ›'}
+function renderChips(){document.getElementById('catChips').innerHTML=CATS.map(function(c){return '<button class="chip'+(state.draft.category===c?' on':'')+'" onclick="pickCat(\''+c+'\')">'+c+'</button>'}).join('')}
+function pickCat(c){state.draft.category=c;renderChips()}
+function timeNow(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())}
+function saveDraft(){var v=parseFloat(document.getElementById('dAmount').value);if(!(v>0)){toast('请先填上金额');document.getElementById('dAmount').focus();return}
+ var cents=Math.round(v*100),note=document.getElementById('dNote').value.trim(),editing=state.editTarget;
+ if(editing){var x=MEM.tx.filter(function(a){return a.id===editing})[0];if(x){x.type=state.draft.type;x.amount=cents;x.date=state.draft.date;x.category=state.draft.category;x.note=note;}state.editTarget=null;toast('已改好')}
+ else{MEM.tx.push({id:uid(),type:state.draft.type,amount:cents,date:state.draft.date,time:timeNow(),category:state.draft.category,note:note,source:'manual',channel:'手动',createdAt:Date.now()});toast('已计入总账')}
+ save();document.getElementById('dAmount').value='';document.getElementById('dNote').value='';state.draft.date=todayStr();state.draft.type='expense';state.draft.category='其他';setDraftType('expense');renderChips();renderDraftDate();switchTab('home')}
+function openEdit(id){state.editId=id;var x=MEM.tx.filter(function(a){return a.id===id})[0];if(!x)return;document.getElementById('editInfo').textContent=(x.note||x.category)+' · '+(x.type==='income'?'收入':'支出')+' '+fmt(x.amount)+' · '+x.date;document.getElementById('editMask').classList.add('show')}
+function closeEdit(){document.getElementById('editMask').classList.remove('show');state.editId=null}
+function editAsNew(){var x=MEM.tx.filter(function(a){return a.id===state.editId})[0];if(!x)return;var target=x.id;document.getElementById('dAmount').value=(x.amount/100).toFixed(2);document.getElementById('dNote').value=x.note||'';state.draft.type=x.type;state.draft.date=x.date;state.draft.category=x.category;setDraftType(x.type);renderChips();renderDraftDate();closeEdit();switchTab('manual');state.editTarget=target;toast('改好后点最下面的保存按钮')}
+function deleteTx(){if(!state.editId)return;MEM.tx=MEM.tx.filter(function(a){return a.id!==state.editId});save();closeEdit();renderHome();toast('已删除这一笔')}
+
+var IH=50;
+function daysIn(y,m){return new Date(y,m,0).getDate()}
+function buildCol(id,arr,key){var el=document.getElementById(id);el._arr=arr;var h='<div class="wheel-pad"></div>';arr.forEach(function(v,i){h+='<div class="wheel-item" data-i="'+i+'" onclick="wheelGo(\''+key+'\','+i+')">'+v+'</div>'});el.innerHTML=h+'<div class="wheel-pad"></div>';
+ if(!el._bound){el._bound=true;el.addEventListener('scroll',function(){clearTimeout(el._t);el._t=setTimeout(function(){var i=Math.max(0,Math.min(el._arr.length-1,Math.round(el.scrollTop/IH)));setWheelSel(key,i)},90)})}}
+function buildDays(){var y=state.wheel.y,m=state.wheel.m,n=daysIn(y,m),a=[];for(var i=1;i<=n;i++)a.push(pad(i)+'日');if(state.wheel.d>n)state.wheel.d=n;buildCol('wDay',a,'d');var el=document.getElementById('wDay');el.scrollTop=(state.wheel.d-1)*IH;markWheel('d',state.wheel.d-1)}
+function buildWheel(){var ya=[];for(var y=2020;y<=new Date().getFullYear()+1;y++)ya.push(y+'年');buildCol('wYear',ya,'y');var ma=[];for(var m=1;m<=12;m++)ma.push(pad(m)+'月');buildCol('wMonth',ma,'m');buildDays()}
+function setWheelSel(key,i){if(key==='y'){state.wheel.y=2020+i;buildDays();markWheel('y',i)}else if(key==='m'){state.wheel.m=i+1;buildDays();markWheel('m',i)}else{state.wheel.d=i+1;markWheel('d',i)}}
+function markWheel(key,i){var id=key==='y'?'wYear':key==='m'?'wMonth':'wDay',el=document.getElementById(id),items=el.querySelectorAll('.wheel-item');for(var k=0;k<items.length;k++)items[k].classList.toggle('sel',k===i)}
+function wheelGo(key,i){var id=key==='y'?'wYear':key==='m'?'wMonth':'wDay',el=document.getElementById(id);el.scrollTo({top:i*IH,behavior:'smooth'})}
+function wheelApply(dateStr){var p=dateStr.split('-').map(Number);state.wheel={y:p[0],m:p[1],d:p[2]};var wy=p[0]-2020,wm=p[1]-1,wd=p[2]-1;
+ ['wYear','wMonth','wDay'].forEach(function(id,i){var el=document.getElementById(id);el.scrollTop=[wy,wm,wd][i]*IH});markWheel('y',wy);markWheel('m',wm);markWheel('d',wd)}
+function openWheel(){buildWheel();document.getElementById('wheelMask').classList.add('show');requestAnimationFrame(function(){requestAnimationFrame(function(){wheelApply(state.draft.date)})})}
+function closeWheel(){document.getElementById('wheelMask').classList.remove('show')}
+function wheelToday(){wheelApply(todayStr())}
+function confirmWheel(){state.draft.date=state.wheel.y+'-'+pad(state.wheel.m)+'-'+pad(state.wheel.d);renderDraftDate();closeWheel()}
+
+function onFilesPicked(e){var fs=Array.prototype.slice.call(e.target.files||[]);if(!fs.length)return;fs.forEach(function(f){state.pending.push({id:uid(),file:f,url:URL.createObjectURL(f),channel:'微信',date:todayStr(),items:[],ptype:'expense',note:''})});e.target.value='';renderUpload();toast('已加入 '+fs.length+' 张截图')}
+function renderUpload(){var el=document.getElementById('shotList');if(!state.pending.length){el.innerHTML='<div class="empty" style="padding:26px 10px">还没有选图片。<br>点上面蓝色按钮，去相册里选截好的图。</div>'}
+ else{el.innerHTML=state.pending.map(function(c,i){var items=c.items.map(function(it,j){return '<div class="pitem"><span>'+(it.type==='income'?'收入':'支出')+' '+fmt(it.amount)+' · '+esc(it.date||c.date)+' · '+esc(it.note||c.channel)+'</span><button class="del" onclick="removeItem(\''+c.id+'\','+j+')">删掉</button></div>'}).join('');
+  return '<div class="shot"><div class="top"><img src="'+c.url+'" alt="截图'+(i+1)+'"><div class="info"><div style="font-size:16px;font-weight:700;margin-bottom:4px">第 '+(i+1)+' 张截图</div><div class="fname">'+esc(c.file.name||'截图')+'</div><div class="muted" style="margin-top:6px">这张图是从哪来的？</div><div class="miniseg" style="margin-top:6px">'+['微信','支付宝','银行卡','其他'].map(function(ch){return '<button class="'+(c.channel===ch?'on':'')+'" onclick="setChannel(\''+c.id+'\',\''+ch+'\')">'+ch+'</button>'}).join('')+'</div></div></div>'+
+  '<div style="margin-top:10px"><button class="btn btn-ghost" style="padding:9px;font-size:15px;'+(c.ocrBusy?'opacity:.6':'')+'" onclick="autoRecognize(\''+c.id+'\')">'+(c.ocrBusy?'正在本机识别…':'自动识别这张（本机）')+'</button> <span class="muted">'+(c.ocrBusy?'请稍等，正在本机识别':'识别不了就自己在下面填')+'</span></div>'+
+  '<div class="addrow"><div class="miniseg"><button class="'+(c.ptype==='expense'?'on':'')+'" onclick="setPType(\''+c.id+'\',\'expense\')">支出</button><button class="'+(c.ptype==='income'?'on i':'')+'" onclick="setPType(\''+c.id+'\',\'income\')">收入</button></div><input type="number" inputmode="decimal" step="0.01" min="0" placeholder="金额" id="amt_'+c.id+'"><input type="text" placeholder="买了什么（可不填）" id="note_'+c.id+'"><button class="btn btn-primary btn-sm" onclick="addItem(\''+c.id+'\')">加入</button></div>'+
+  (items?'<div class="items">'+items+'</div>':'')+'</div>'}).join('')}
+ var total=state.pending.reduce(function(s,c){return s+c.items.length},0);var b=document.getElementById('confirmAllBtn');b.disabled=total===0;b.textContent=total?('全部计入总账（共 '+total+' 笔）'):'全部计入总账'}
+function setChannel(id,ch){state.pending.filter(function(c){return c.id===id})[0].channel=ch;renderUpload()}
+function setPType(id,t){state.pending.filter(function(c){return c.id===id})[0].ptype=t;renderUpload()}
+function addItem(id){var c=state.pending.filter(function(a){return a.id===id})[0];if(!c)return;var el=document.getElementById('amt_'+id),v=parseFloat(el.value);if(!(v>0)){toast('请先填这一笔的金额');return}
+ c.items.push({type:c.ptype,amount:Math.round(v*100),date:c.date,note:(document.getElementById('note_'+id).value||'').trim()});el.value='';document.getElementById('note_'+id).value='';renderUpload();toast('加好了，还能继续加下一笔')}
+function removeItem(id,j){var c=state.pending.filter(function(a){return a.id===id})[0];if(!c)return;c.items.splice(j,1);renderUpload()}
+window.OCR_HOOK=null;
+function compressForOcr(file,cb){var u=URL.createObjectURL(file),im=new Image();
+ im.onload=function(){try{var mx=1280,w=im.width,h=im.height,k=Math.min(1,mx/Math.max(w,h)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(w*k));cv.height=Math.max(1,Math.round(h*k));cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);cb(cv.toDataURL('image/jpeg',0.85).split(',')[1])}catch(e){cb(null)}finally{URL.revokeObjectURL(u)}};
+ im.onerror=function(){URL.revokeObjectURL(u);cb(null)};im.src=u}
+function ocrDone(id,msg){var c=state.pending.filter(function(a){return a.id===id})[0];if(c)c.ocrBusy=false;renderUpload();toast(msg)}
+function autoRecognize(id){var c=state.pending.filter(function(a){return a.id===id})[0];if(!c||c.ocrBusy)return;c.ocrBusy=true;renderUpload();toast('正在本机识别这张截图…');
+ if(window.AndroidOcr&&window.AndroidOcr.recognize){compressForOcr(c.file,function(b64){if(!b64){ocrDone(id,'这张图读不出来，请手动填金额');return}try{window.AndroidOcr.recognize(id,b64)}catch(e){ocrDone(id,'识别没能启动，请手动填金额')}});return}
+ legacyOcr(id,c)}
+function legacyOcr(id,c){if(typeof window.OCR_HOOK==='function'){try{var a=window.OCR_HOOK(c.file)||[];a.forEach(function(o){c.items.push({type:o.type||'expense',amount:Math.round(Number(o.amount)*100),date:o.date||c.date,time:o.time||'12:00',note:o.note||''})});ocrDone(id,a.length?('认出 '+a.length+' 笔，请核对'):'没认出来，请手动填金额');return}catch(e){}}
+ if(window.TextDetector){try{var d=new window.TextDetector();d.detect(c.file).then(function(ts){window.onOcrResult(id,JSON.stringify(ts.map(function(t){return t.rawValue||''})))}).catch(function(){ocrDone(id,'没认出来，请手动填金额')});return}catch(e){}}
+ ocrDone(id,'本机没装自动识别，请在下面填金额后点「加入」')}
+window.onOcrResult=function(cardId,rowsJson){var c=state.pending.filter(function(a){return a.id===cardId})[0];if(!c)return;c.ocrBusy=false;
+ var rows;try{rows=JSON.parse(rowsJson)}catch(e){rows=[]}
+ if(!Array.isArray(rows)||!rows.length){renderUpload();toast('这张图没认出文字，请手动填金额');return}
+ var found=parseBillRows(rows,c);
+ if(!found.length){renderUpload();toast('认出了文字但没找到金额，请手动填金额');return}
+ found.forEach(function(it){c.items.push(it)});renderUpload();toast('认出 '+found.length+' 笔，请逐笔核对后再计入')};
+function parseBillRows(rows,card){var out=[],seen={};
+ rows.forEach(function(raw){var line=String(raw==null?'':raw).trim();if(!line)return;
+  var tm=line.match(/(\d{1,2}):(\d{2})/),time=tm?(pad(parseInt(tm[1],10))+':'+tm[2]):'12:00';
+  var dm=line.match(/(\d{4})[-\/.年](\d{1,2})[-\/.月](\d{1,2})/),date=dm?(dm[1]+'-'+pad(parseInt(dm[2],10))+'-'+pad(parseInt(dm[3],10))):card.date;
+  var clean=line.replace(/\d{4}[-\/.年]\d{1,2}[-\/.月]\d{1,2}日?/g,' ').replace(/\d{1,2}:\d{2}(:\d{2})?/g,' ').replace(/[．。]/g,'.');
+  var re=/([+＋\-－]|¥|￥)?\s*(\d{1,7}\.\d{2})(?:\s*元)?/g,m;
+  while((m=re.exec(clean))!==null){var amt=Math.round(parseFloat(m[2])*100);if(amt<=0||amt>100000000)continue;
+   var sign=m[1]||'',type=(sign==='+'||sign==='＋')?'income':(sign==='-'||sign==='－')?'expense':(/(收入|收款|退款|入账|转入|已退)/.test(line)?'income':'expense');
+   var name=clean.replace(/([+＋\-－]|¥|￥)?\s*\d{1,7}\.\d{2}(?:\s*元)?/g,' ').replace(/(微信支付|支付宝|交易成功|已存入零钱|账单|明细|支出|收入|退款|付款|商户|消费|当前状态)/g,' ').replace(/\d{1,2}\s*月\s*\d{1,2}\s*日/g,' ').replace(/\s+/g,' ').trim().slice(0,40);
+   var key=[date,type,amt,name,time].join('|');if(seen[key])continue;seen[key]=1;
+   out.push({type:type,amount:amt,date:date,time:time,note:name||'截图识别'})}});
+ return out}
+function confirmAll(){var all=[];state.pending.forEach(function(c){c.items.forEach(function(it){all.push({id:uid(),type:it.type,amount:it.amount,date:it.date,time:it.time||'12:00',category:'其他',note:it.note||(c.channel+'账单'),source:'screenshot',channel:c.channel,createdAt:Date.now()})})});
+ if(!all.length){toast('还没有任何一笔可以存');return}MEM.tx=MEM.tx.concat(all);save();state.pending.forEach(function(c){if(c.url)URL.revokeObjectURL(c.url)});state.pending=[];renderUpload();switchTab('home');toast('已经计入 '+all.length+' 笔')}
+
+function phoneDemo(title,rows,hl,foot){return '<div class="demo-phone"><div class="demo-bar">'+esc(title)+'</div>'+rows.map(function(r,i){return '<div class="demo-row'+(i===hl?' hl':'')+'">'+esc(r)+(i===hl?'<span class="demo-tap">点这里</span>':'')+'</div>'}).join('')+(foot?'<div class="demo-foot">'+esc(foot)+'</div>':'')+'</div>'}
+function step(n,text,demo){return '<div class="step"><div class="no">'+n+'</div><div class="txt">'+text+(demo||'')+'</div></div>'}
+var GUIDE=[
+ {t:'一、先说清楚：这个 App 是干什么的',lead:'您把微信、支付宝、银行卡里的账单<b>截成图片</b>，一次传进来，这个 App 就帮您把每一笔钱记住，自动算出<b>一共收了多少钱、一共花了多少钱</b>。也可以自己动手记一笔。<br><br><b>最重要的一句：这个 App 不上网。</b>您的截图和账目只放在这台手机里，不会发给任何人，别人看不到。'},
+ {t:'二、微信的账单在哪里？怎么截图？',steps:[
+  ['在手机桌面上找到<b>微信</b>（绿色的图标），点一下打开。',phoneDemo('微信',['消息列表','通讯录','发现','我'],3)],
+  ['看屏幕<b>最下面一排</b>，点最右边的「<b>我</b>」。',phoneDemo('微信 · 我',['头像 / 名字','服务','收藏','朋友圈','设置'],1)],
+  ['点「<b>服务</b>」。（有的手机上写着「支付」，意思一样，点它就行。）',phoneDemo('微信',['收付款','零钱','钱包','服务'],2)],
+  ['点「<b>钱包</b>」，再点最上面右边的「<b>账单</b>」两个字。',phoneDemo('微信 · 钱包',['零钱','银行卡','账单  ›','支付分'],2)],
+  ['现在每一笔钱都列出来了。<b>往下慢慢滑，滑一屏就截一张图</b>，一直截到您想记的那天为止。',phoneDemo('微信 · 账单',['11月13日  早餐  -18.00','11月12日  超市  -86.50','11月11日  工资  +8000.00','往下还能滑'],-1,'一屏一屏往下截')],
+  ['截好的图会自动放进手机相册的「<b>截图</b>」文件夹里，等一下去那里找。','']]},
+ {t:'三、支付宝的账单在哪里？怎么截图？',steps:[
+  ['打开<b>支付宝</b>（蓝色图标）。',phoneDemo('支付宝',['首页','理财','消息','我的'],3)],
+  ['点屏幕最下面最右边的「<b>我的</b>」。',phoneDemo('支付宝 · 我的',['头像 / 名字','余额','账单  ›','银行卡'],2)],
+  ['点「<b>账单</b>」，每一笔收支就都出来了。',phoneDemo('支付宝 · 账单',['今天  早餐  -18.00','昨天  地铁  -6.00','昨天  退款  +25.00','往下还能滑'],-1,'一屏一屏往下截')],
+  ['和微信一样，<b>往下滑一屏、截一张</b>。','']]},
+ {t:'四、手机银行（银行卡）的账单怎么截图？',steps:[
+  ['打开您<b>那家银行</b>的 App，比如工商银行、建设银行、招商银行……每家名字不一样，图标也不同。',''],
+  ['登录以后，找「<b>账户明细</b>」，也可能叫「<b>交易明细</b>」「<b>收支明细</b>」，点开它。',phoneDemo('手机银行',['我的账户','转账','账户明细  ›','电子回单'],2)],
+  ['看到每一笔进出以后，往下滑，一屏一屏截图。',''],
+  ['<b>特别注意：</b>很多银行 App <b>不让截屏</b>，截出来是一张全黑的图片。这不是手机坏了，是银行在保护您的钱，是好事。遇到这种情况，请改用下面两个办法之一：① 在这个明细页点「<b>电子回单</b>」或「<b>导出流水</b>」，把流水看清楚后，回到本 App 用「<b>记一笔</b>」把金额记下来；② 或者只看银行发到手机上的<b>短信通知</b>，照着金额手动记一笔。',phoneDemo('手机银行',['提示：此页面不允许截屏','请返回后使用「电子回单」'],-1,'黑屏是正常的，别着急')]]},
+ {t:'五、手机到底怎么截屏？（三种办法，哪种能用用哪种）',steps:[
+  ['<b>办法一（最常用）：</b>同时按住手机右侧的「<b>电源键</b>」和「<b>音量减小键</b>」，按住约一秒，屏幕闪一下、或者听到「咔嚓」一声，就成了。',''],
+  ['<b>办法二：</b>如果上面两个键不好按，就从屏幕<b>最上边往下拉</b>，拉出一排小方块，找到写着「<b>截屏</b>」或「<b>截图</b>」的那个，点一下。',phoneDemo('下拉菜单',['手电筒','静音','截屏  ⬚','设置'],2)],
+  ['<b>办法三：</b>华为、小米、OPPO、vivo 等手机，可以用<b>三根手指在屏幕上往下滑</b>，也能截屏。',''],
+  ['截完以后，屏幕左下角会冒出一张小小的图片，这就说明成功了。找不到也没关系，等下去相册的「截图」文件夹里看。','']]},
+ {t:'六、怎么把截图一次传进这个 App？',steps:[
+  ['回到这个 App，点屏幕最下面那一排里的「<b>上传截图</b>」。',phoneDemo('安心记账',['明细','上传截图  ›','记一笔','使用说明'],1)],
+  ['点那个大大的蓝色按钮「<b>＋ 选择截图（可一次选多张）</b>」。',''],
+  ['手机会打开相册。找到「<b>截图</b>」或「<b>Screenshots</b>」这个文件夹，点进去。',phoneDemo('相册',['相机','截图  (12)','微信','下载'],1)],
+  ['<b>一张一张点</b>刚才截的图，可以一次点好多张。有的手机要先<b>按住第一张</b>，再点其余的。选完点右上角「<b>完成</b>」或「<b>确定</b>」。',''],
+  ['回到 App，每一张图会变成一张卡片。先选好这张图是<b>微信 / 支付宝 / 银行卡</b>来的，再点「<b>自动识别这张（本机）</b>」。识别是在您手机本机做的，不用联网，图片也不会传出去。',phoneDemo('第 1 张截图',['这张图是从哪来的？','微信 | 支付宝 | 银行卡','自动识别这张（本机）','金额  加入'],2)],
+  ['识别完，每一笔会列在卡片里。<b>请一定逐笔核对</b>：金额对不对、是支出还是收入、日期对不对。<b>没认出来或者认错了</b>，点那笔右边的「删掉」，再在下面自己填：点「支出」或「收入」，填金额，点「加入」。一张图里有好几笔，就加几次。',''],
+  ['每一笔都核对一遍（填错了点「删掉」重来），最后点最下面蓝色的「<b>全部计入总账</b>」，就全存好了。','']]},
+ {t:'七、不想截图，想自己直接记一笔，怎么记？',steps:[
+  ['点屏幕最下面的「<b>记一笔</b>」。',phoneDemo('安心记账',['明细','上传截图','记一笔  ›','使用说明'],2)],
+  ['先选：钱<b>花出去</b>了就点「<b>支出</b>」，钱<b>收进来</b>了就点「<b>收入</b>」。',''],
+  ['点「<b>多少钱</b>」那一行，用数字键盘输入数目。比如十八块五，就填 <b>18.5</b>。',''],
+  ['<b>日期已经自动填好今天了，一般不用管。</b>要是想改成别的日子：点一下「日期」那一行，会弹出三列数字（年、月、日）。用手指<b>上下滚动</b>，把想要的数字滚到中间那个蓝色框里，再点「<b>确定</b>」。',phoneDemo('滚动选择日期',['2025年  |  10月  |  12日','2026年  |  11月  |  13日  ←蓝框','2027年  |  12月  |  14日'],1,'上下滚动，滚到中间')],
+  ['最后点最下面的「<b>保存并计入总账</b>」。这一笔马上就算进总数里了。','']]},
+ {t:'八、怎么看一共花了多少钱？',steps:[
+  ['点屏幕最下面的「<b>明细</b>」。最上面有「<b>日　周　月　年</b>」四个字，想看这个月就点「月」，想看今天点「日」，想看一整年点「年」。',''],
+  ['下面三个大数字就是答案：<b>总收入</b>（一共收了多少）、<b>总支出</b>（一共花了多少）、<b>结余</b>（剩下多少）。',''],
+  ['想看具体某一笔，往下翻列表；想找某一笔，在上面「<b>搜店名 / 备注</b>」里打字；只想看花的钱，就点「<b>支出</b>」；只想看自己手动记的，就在「全部来源」里选「手动记的」。',''],
+  ['想看别的月份，点日期两边的「<b>‹</b>」和「<b>›</b>」，一下一下往前翻、往后翻。','']]},
+ {t:'九、常遇到的问题',qa:[
+  ['相册里找不到刚截的图怎么办？','打开手机自带的「相册」或「图库」，找名叫「<b>截图</b>」或「<b>Screenshots</b>」的文件夹，刚截的图一般排在最前面。'],
+  ['一次能选多少张？','不限，一次选十几张也行。选完还能再点一次蓝色按钮继续加图。'],
+  ['金额认错了、填错了怎么办？','在存进去<b>之前</b>，每张卡片下面都能点「删掉」重填。已经存进去的，去「明细」里点那一条，就能「改金额 / 改日期 / 改备注」或者「删除这一笔」。'],
+  ['同一笔钱会不会被记两次？','会，如果您把同一张截图传了两次。所以传之前看一眼，重复的别选；已经重复了，点那一条删掉一笔就行。'],
+  ['银行页面截出来是全黑的？','这是银行在保护您的钱，正常现象。请照着第四节的办法，用「电子回单」看清楚金额后，回来「记一笔」手动记下。'],
+  ['自动识别出来的金额或日期不对怎么办？','识别只是帮您先填好，<b>存进去之前一定要过一眼</b>。不对的点那笔右边的「删掉」重填；已经存进去了，就去「明细」点那一笔改金额、改日期、改备注。日期默认取截图当天，老账单请自己改一下。'],
+  ['自动识别是在网上做的吗？会不会泄露？','<b>不会。</b>识别用的是打包在 App 里的离线模型，在您手机本机完成。App 没有联网权限，截图和认出来的文字都不会发到任何地方。'],
+  ['会不会有人看到我的钱？','<b>不会。</b>这个 App 没有联网权限，不传照片、不传数字，所有东西只存在您这台手机里。点「全部计入总账」之后，截图会立刻从 App 里丢掉，不会留在里面。'],
+  ['换手机或者卸载了，账还在吗？','<b>直接卸载就没了。</b>换手机前请照着第十节做一次「导出备份」，到新手机再「从备份文件恢复」，所有账目就都回来了。'],
+  ['备份文件里有什么？安全吗？','里面只有每笔钱的<b>金额、日期、分类和您写的备注</b>，没有密码、没有银行卡号、没有身份证号。<b>但拿到这个文件的人能看到您的账</b>，所以请自己收好，别随便发给别人。']]},
+ {t:'十、换手机了怎么办？（导出备份 / 恢复）',steps:[
+  ['在<b>旧手机</b>上打开这个 App，点最下面「<b>明细</b>」，一直翻到最下面，点「<b>备份与恢复（换手机用）</b>」。',phoneDemo('安心记账 · 明细',['总收入 / 总支出','一笔一笔的账目','备份与恢复（换手机用）','清空全部账本'],2)],
+  ['点蓝色的「<b>① 导出备份文件</b>」。手机会问您存到哪里，选「<b>下载</b>」或「<b>文件</b>」都行，再点「<b>保存</b>」。文件名一般叫「安心记账-备份-日期.json」，记住它。',''],
+  ['把这个文件送到新手机：用微信发给自己、用数据线拷贝、或者存到网盘，哪个方便用哪个。<b>这一步是您自己传，App 不会帮您传，也不会联网。</b>',''],
+  ['在<b>新手机</b>装好这个 App，同样点「明细」最下面的「<b>备份与恢复</b>」，再点「<b>② 从备份文件恢复</b>」，找到刚才那个文件，点它。',phoneDemo('备份与恢复',['① 导出备份文件','② 从备份文件恢复  ›','返回'],1)],
+  ['App 会告诉您读到了多少笔。要<b>两个手机合在一起</b>就点「<b>合并</b>」（重复的不会记两次）；<b>只要备份里的账</b>就点「<b>只留备份</b>」。',''],
+  ['恢复完回到「明细」，按「月」「年」翻一翻，每一笔账都回来了。以后每隔一段时间导出一次，心里更踏实。','']]},
+ {t:'十一、记不住就记这一句',lead:'<b>先在微信 / 支付宝里把账单截成一屏一屏的图片 → 回到这个 App 点「上传截图」→ 一次把图片都选上 → 核对金额 → 点「全部计入总账」。</b><br><br>换手机前记得点「备份与恢复」导出一次。<br><br>看不懂就点最下面的「使用说明」，慢慢照着做，一遍不会就再来一遍，不着急。'}
+];
+function renderGuide(){var h='<div class="lead"><b>这本说明是写给不熟悉手机的人看的，字大、一步一图，慢慢来。</b><br>觉得字还不够大，点最上面右边的「字 A+」，可以再放大两档。</div>';
+ GUIDE.forEach(function(sec){h+='<h2>'+sec.t+'</h2>';if(sec.lead)h+='<div class="lead">'+sec.lead+'</div>';
+  if(sec.steps)sec.steps.forEach(function(s,i){h+=step(i+1,s[0],s[1])});
+  if(sec.qa)sec.qa.forEach(function(q){h+='<div class="qa"><div class="q">问：'+q[0]+'</div><div class="a">答：'+q[1]+'</div></div>'})});
+ h+='<div class="privacy" style="font-size:17px"><b>再次说明：</b>本应用不申请联网权限，不上传任何截图与账目，不收集姓名、卡号、手机号。您的数据只在这台手机里；备份文件由您自己选位置保存，App 不会替您上传。</div>';
+ document.getElementById('page-guide').innerHTML=h}
+function backupJSON(){return JSON.stringify({app:'安心记账',format:'anjixin-backup',version:1,exportedAt:new Date().toISOString(),count:MEM.tx.length,transactions:MEM.tx},null,2)}
+function exportBackup(){var data=backupJSON();
+ if(window.AndroidBackup&&window.AndroidBackup.exportBackup){try{window.AndroidBackup.exportBackup(data);toast('请选一个位置保存备份文件');return}catch(e){}}
+ try{var blob=new Blob([data],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='安心记账-备份-'+todayStr()+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url)},1500);toast('备份文件已导出（共 '+MEM.tx.length+' 笔）')}catch(e){toast('导出失败：'+e.message)}}
+function pickBackup(){if(window.AndroidBackup&&window.AndroidBackup.importBackup){try{window.AndroidBackup.importBackup();toast('请选之前导出的备份文件');return}catch(e){}}document.getElementById('backupFile').click()}
+function onBackupPicked(e){var f=(e.target.files||[])[0];if(!f)return;var r=new FileReader();r.onload=function(){handleBackupText(String(r.result))};r.onerror=function(){toast('没读到这个文件，换一个试试')};r.readAsText(f,'utf-8');e.target.value=''}
+window.onBackupLoaded=function(text){handleBackupText(String(text))};
+function txFingerprint(x){return [x.date,x.type,x.amount,x.note||'',x.time||''].join('|')}
+function handleBackupText(text){var obj;try{obj=JSON.parse(text)}catch(e){toast('这不是备份文件，换一个试试');return}
+ var arr=Array.isArray(obj)?obj:(obj&&Array.isArray(obj.transactions)?obj.transactions:null);
+ if(!arr){toast('备份文件内容不对，换一个试试');return}
+ var clean=[];arr.forEach(function(o){o=o||{};if(!/^\d{4}-\d{2}-\d{2}$/.test(o.date||''))return;var a=Number(o.amount);if(!isFinite(a)||a<0)return;
+  clean.push({id:(typeof o.id==='string'&&o.id)?o.id:uid(),type:(o.type==='income'||o.type==='expense')?o.type:'expense',amount:Math.round(a),date:o.date,time:/^\d{2}:\d{2}$/.test(o.time||'')?o.time:'12:00',category:(typeof o.category==='string'?o.category.slice(0,10):'其他')||'其他',note:typeof o.note==='string'?o.note.slice(0,100):'',source:(o.source==='manual'||o.source==='screenshot')?o.source:'manual',channel:typeof o.channel==='string'?o.channel.slice(0,20):'备份',createdAt:Number(o.createdAt)||Date.now()})});
+ if(!clean.length){toast('备份里没有能用的账目，换一个试试');return}
+ state.backupData=clean;
+ document.getElementById('restoreArea').innerHTML='<div class="tip" style="margin-top:14px">读到了 <b>'+clean.length+'</b> 笔账目。请选择怎么恢复：</div><button class="btn btn-primary" onclick="applyRestore(\'merge\')">合并（保留现在的，重复的不要）</button><div style="height:8px"></div><button class="btn btn-ghost" onclick="applyRestore(\'replace\')">只留备份（用备份覆盖现在的）</button>';
+ document.getElementById('backupMask').classList.add('show')}
+function applyRestore(mode){var b=state.backupData||[];if(!b.length)return;
+ if(mode==='replace'){MEM.tx=b.slice();toast('已从备份恢复 '+b.length+' 笔')}
+ else{var keys={},added=0;MEM.tx.forEach(function(x){keys[txFingerprint(x)]=1});b.forEach(function(x){var k=txFingerprint(x);if(!keys[k]){MEM.tx.push(x);keys[k]=1;added++}});toast('合并完成，新增 '+added+' 笔')}
+ save();state.backupData=null;document.getElementById('restoreArea').innerHTML='';closeBackup();renderHome()}
+function openBackup(){state.backupData=null;document.getElementById('backupInfo').textContent='当前账本共 '+MEM.tx.length+' 笔。';document.getElementById('restoreArea').innerHTML='';document.getElementById('backupMask').classList.add('show')}
+function closeBackup(){document.getElementById('backupMask').classList.remove('show')}
+var clearArmed=false,clearTimer=null;
+function askClear(){var b=document.getElementById('clearBtn');
+ if(!clearArmed){clearArmed=true;b.textContent='确定要清空？再点一次（不可恢复）';b.style.color='var(--red)';clearTimer=setTimeout(function(){clearArmed=false;b.textContent='清空全部账本';b.style.color='';},6000);return}
+ clearTimeout(clearTimer);clearArmed=false;MEM.tx=[];save();b.textContent='清空全部账本';b.style.color='';renderHome();toast('账本已清空')}
+function switchTab(t){state.tab=t;['home','upload','manual','guide'].forEach(function(k){document.getElementById('page-'+k).classList.toggle('active',k===t);document.getElementById('tab-'+k).classList.toggle('on',k===t)});
+ if(t==='home')renderHome();if(t==='upload')renderUpload();if(t==='manual'){state.editTarget=null;renderDraftDate();renderChips()};window.scrollTo(0,0)}
+load();state.draft.date=todayStr();renderDraftDate();renderChips();renderGuide();renderHome();
+</script>
+</body>
+</html>
