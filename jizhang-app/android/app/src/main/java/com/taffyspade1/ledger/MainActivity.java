@@ -1,4 +1,4 @@
-package com.example.jizhang;
+package com.taffyspade1.ledger;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;

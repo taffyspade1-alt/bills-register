@@ -37,7 +37,7 @@ jizhang-app/
 └── android/                  # Android 原生工程
     ├── app/src/main/
     │   ├── assets/index.html                      # app.html 的副本，APK 实际加载的就是它
-    │   ├── java/com/example/jizhang/MainActivity.java   # WebView 壳 + 原生桥接（383 行）
+    │   ├── java/com/taffyspade1/ledger/MainActivity.java  # WebView 壳 + 原生桥接（383 行）
     │   ├── AndroidManifest.xml                    # 权限清单
     │   └── res/                                   # 五档图标 + 自适应图标
     ├── build.gradle
@@ -107,6 +107,8 @@ cp jizhang-app/app.html jizhang-app/android/app/src/main/assets/index.html
 
 备份文件是明文 JSON，不含密码、银行卡号、身份证号，但拿到文件的人能看到全部账目，别放群聊或公共网盘。
 
+更换 `applicationId`（本次从 `com.example.jizhang` 改为 `com.taffyspade1.ledger`）时同样要走一遍导出 → 装新版 → 恢复，旧应用的数据目录不会自动迁移。
+
 ## 构建排错
 
 | 现象 | 处理 |
@@ -116,6 +118,7 @@ cp jizhang-app/app.html jizhang-app/android/app/src/main/assets/index.html
 | 找不到 `gradle-wrapper.jar` | 用 Android Studio 打开工程会自动补齐；纯命令行需先执行一次 `gradle wrapper` |
 | APK 装不上 | 确认是已签名的 debug 包、手机允许未知来源、Android ≥ 6.0 |
 | 点「自动识别」没反应 | 确认装的是含 OCR 桥接的新包、Gradle Sync 成功且 ML Kit 依赖已下载；截图太糊也会识别失败 |
+| 改包名后旧版账本不见了 | 正常，包名变了系统视为新应用。在旧版导出备份、新版恢复即可，别先卸旧版 |
 | 改了 `app.html` 手机里没变化 | 忘记同步 `assets/index.html`，见上文「改了页面之后」 |
 
 ## 已知限制
@@ -123,7 +126,7 @@ cp jizhang-app/app.html jizhang-app/android/app/src/main/assets/index.html
 - **OCR 不会百分之百准确**：商户名可能认错，日期默认取截图当天，所有识别结果都要人工核对。绝不建议换成云 OCR——那会破坏离线保证
 - **银行 App 普遍禁止截屏**（系统 `FLAG_SECURE`），截出来是全黑，这是正常保护，请改用电子回单或手动记账
 - **release 包未配置签名**：`build.gradle` 里没有 `signingConfig`，`assembleRelease` 产出的是未签名包，正式分发前需自行生成密钥库
-- **包名仍是 `com.example.jizhang`**：`com.example` 是占位前缀，上架应用商店前必须改，改动后已安装用户的数据无法迁移
+- **包名已改为 `com.taffyspade1.ledger`**（`com.example` 是模板占位前缀，商店审核会拒）。注意 `applicationId` 一变，系统就视为全新应用，旧版账本不会自动带过来：先在旧版导出备份，装新版后恢复，确认无误再卸载旧版；因为包名变了，建议先 `Clean Project` 再重新 Build
 - 只在 Android 上验证过，没有 iOS 版本
 
 ## 图标

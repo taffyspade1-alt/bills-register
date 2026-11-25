@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.jizhang'
+    namespace 'com.taffyspade1.ledger'
     compileSdk 34
 
     defaultConfig {
-        applicationId 'com.example.jizhang'
+        applicationId 'com.taffyspade1.ledger'
         minSdk 23
         targetSdk 34
         versionCode 1
